@@ -37,19 +37,33 @@ async def lifespan(app: FastAPI):
 
     # Initialize Telegram app
     telegram_app = create_telegram_application()
-    if telegram_app and settings.WEBHOOK_URL:
-        webhook_path = f"{settings.WEBHOOK_URL.rstrip('/')}/webhook"
-        logger.info(f"Setting Telegram webhook: {webhook_path}")
-        await telegram_app.initialize()
-        await telegram_app.bot.set_webhook(url=webhook_path)
-        await telegram_app.start()
+    polling_active = False
+    if telegram_app:
+        if settings.WEBHOOK_URL:
+            webhook_path = f"{settings.WEBHOOK_URL.rstrip('/')}/webhook"
+            logger.info(f"Setting Telegram webhook: {webhook_path}")
+            await telegram_app.initialize()
+            await telegram_app.bot.set_webhook(url=webhook_path)
+            await telegram_app.start()
+        else:
+            logger.info("Starting Telegram bot background polling runner inside web container...")
+            await telegram_app.initialize()
+            await telegram_app.start()
+            await telegram_app.updater.start_polling()
+            polling_active = True
 
     yield
 
-    if telegram_app and settings.WEBHOOK_URL:
-        logger.info("Stopping Telegram webhook...")
-        await telegram_app.stop()
-        await telegram_app.shutdown()
+    if telegram_app:
+        if settings.WEBHOOK_URL:
+            logger.info("Stopping Telegram webhook...")
+            await telegram_app.stop()
+            await telegram_app.shutdown()
+        elif polling_active:
+            logger.info("Stopping Telegram bot polling...")
+            await telegram_app.updater.stop()
+            await telegram_app.stop()
+            await telegram_app.shutdown()
 
 
 app = FastAPI(

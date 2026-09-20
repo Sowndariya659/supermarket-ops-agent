@@ -24,7 +24,7 @@ COPY . .
 # Create directory for artifacts
 RUN mkdir -p /app/generated_artifacts
 
-EXPOSE 8000
+EXPOSE 8000 7860
 
 # Default command starts FastAPI web server with lifespan hooks
 CMD ["python", "-m", "app.main"]
