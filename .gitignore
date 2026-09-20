@@ -1,0 +1,63 @@
+# Environment and Secrets
+.env
+.env.local
+*.env
+
+# SQLite & Databases
+*.db
+*.db-*
+*.sqlite
+*.sqlite3
+supermarket.db
+
+# Python & Caches
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+venv/
+.venv/
+ENV/
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Testing & Coverage
+.pytest_cache/
+.coverage
+htmlcov/
+.tox/
+.nox/
+
+# Generated Artifacts & Reports
+*.pdf
+*.pptx
+*.png
+*.jpg
+*.jpeg
+*.wav
+*.ogg
+*.oga
+!tests/assets/*
+
+# IDEs & System files
+.vscode/
+.idea/
+*.swp
+*.swo
+.DS_Store
+Thumbs.db

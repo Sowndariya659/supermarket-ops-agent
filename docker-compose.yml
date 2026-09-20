@@ -1,0 +1,40 @@
+version: '3.8'
+
+services:
+  app:
+    build: .
+    container_name: supermarket_ops_agent
+    restart: always
+    env_file:
+      - .env
+    ports:
+      - "8000:8000"
+    volumes:
+      - ./generated_artifacts:/app/generated_artifacts
+      - ./data:/app/data
+    environment:
+      - DATABASE_URL=postgresql://supermarket_user:supermarket_pass@postgres:5432/supermarket_db
+    depends_on:
+      postgres:
+        condition: service_healthy
+
+  postgres:
+    image: postgres:15-alpine
+    container_name: supermarket_postgres
+    restart: always
+    environment:
+      POSTGRES_USER: supermarket_user
+      POSTGRES_PASSWORD: supermarket_pass
+      POSTGRES_DB: supermarket_db
+    ports:
+      - "5432:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U supermarket_user -d supermarket_db"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+volumes:
+  postgres_data:
