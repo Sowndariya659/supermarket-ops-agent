@@ -207,14 +207,30 @@ cp .env.example .env
 # 4. Seed initial supermarket inventory
 python -m app.seed.seed_data
 
-# 5. Run automated tests
+### Quick Evaluation (Zero Configuration / Zero API Keys Needed):
+Evaluators can test and verify all invariants without creating Telegram bots or API keys:
+```bash
+# 1. Run full 23-scenario test suite (100% offline, zero network calls)
 pytest
 
-# 6. Run Telegram Bot in polling mode
-python -m app.main polling
+# 2. Run the complete 10-step Kirana demo sequence autonomously in your terminal
+python demo_tour.py
 
-# Alternatively, run FastAPI web server:
-python -m app.main
+# 3. Chat with the agent directly in terminal without Telegram
+python cli.py
+```
+
+### Full Setup (With Telegram & Live Gemini Multimodal Vision):
+```bash
+# 1. Copy and configure environment variables
+cp .env.example .env
+# Edit .env and paste your TELEGRAM_BOT_TOKEN and LLM_API_KEY
+
+# 2. Seed initial supermarket inventory
+python -m app.seed.seed_data
+
+# 3. Run Telegram Bot in polling mode
+python -m app.main polling
 ```
 
 ### Docker Deployment:
@@ -238,3 +254,4 @@ The FastAPI health endpoint is available at `http://localhost:8000/health`.
 9. **Invoice PDF**: *"send me that bill as a PDF"* -> Bot uploads generated PDF.
 10. **Analysis Deck**: *"make this week's sales analysis deck"* -> Bot uploads PowerPoint presentation.
 11. **Persistent Memory**: *"always assume UPI unless I say cash"* -> Persisted across sessions and `/new` chats.
+12. **Multimodal Vision**: Send a photo of a handwritten grocery slip or invoice -> Bot reads items and adds them to the bill.
