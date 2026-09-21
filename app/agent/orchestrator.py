@@ -157,7 +157,7 @@ class AgentOrchestrator:
                 "tools": tools,
             }
             try:
-                with httpx.Client(timeout=12.0) as client:
+                with httpx.Client(timeout=25.0) as client:
                     resp = client.post(url, json=payload)
                     if resp.status_code != 200:
                         logger.warning(f"Gemini Multimodal returned {resp.status_code}: {resp.text[:200]}")
@@ -237,7 +237,7 @@ class AgentOrchestrator:
                 "tools": tools,
             }
             try:
-                with httpx.Client(timeout=6.0) as client:
+                with httpx.Client(timeout=15.0) as client:
                     resp = client.post(url, json=payload)
                     if resp.status_code != 200:
                         logger.warning(f"Gemini API returned {resp.status_code}: {resp.text[:200]}")
