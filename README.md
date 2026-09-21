@@ -1,8 +1,6 @@
 
 # 🛒 Kirana Ops Agent (Supermarket Assistant)
 
-![Banner](https://via.placeholder.com/1000x300?text=Kirana+Ops+Agent)
-
 A highly resilient, autonomous AI assistant designed to streamline operations for Indian Supermarkets and Kirana stores. Built with **FastAPI**, **SQLite**, and **Google Gemini**, this Telegram bot serves as a virtual store manager capable of handling billing, inventory management, Khata (credit) tracking, and multimodal image processing.
 
 ---
@@ -21,7 +19,7 @@ A highly resilient, autonomous AI assistant designed to streamline operations fo
 ## 🎥 Demo
 
 [Watch the full demo video here!]([https://github.com/user-attachments/assets/5ef54f1f-75ee-4474-ab6f-988307ec1030])  
-
+https://github.com/user-attachments/assets/dceb4baf-0a4a-48fd-8efe-b44875d10879
 
 ### 📸 Screenshots
 
