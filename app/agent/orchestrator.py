@@ -1,5 +1,6 @@
 """Agent Orchestrator: Multi-turn LLM agent loop with dynamic tool calling and artifact routing."""
 
+import time
 import json
 import logging
 import base64
@@ -26,6 +27,7 @@ class AgentOrchestrator:
     def __init__(self):
         # In-memory conversational histories keyed by chat_id
         self._histories: Dict[int, List[Dict[str, Any]]] = {}
+        self._gemini_cooldown_until: float = 0.0
 
     def get_history(self, chat_id: int) -> List[Dict[str, Any]]:
         if chat_id not in self._histories:
@@ -155,14 +157,17 @@ class AgentOrchestrator:
                 "tools": tools,
             }
             try:
-                with httpx.Client(timeout=45.0) as client:
+                with httpx.Client(timeout=12.0) as client:
                     resp = client.post(url, json=payload)
                     if resp.status_code != 200:
                         logger.warning(f"Gemini Multimodal returned {resp.status_code}: {resp.text[:200]}")
+                        if resp.status_code in (429, 500, 502, 503, 504):
+                            self._gemini_cooldown_until = time.time() + 60.0
                         return None
                     data = resp.json()
             except Exception as e:
-                logger.warning(f"Gemini Multimodal request error: {e}")
+                logger.warning(f"Gemini Multimodal request error or timeout: {e}")
+                self._gemini_cooldown_until = time.time() + 30.0
                 return None
 
             candidate = data.get("candidates", [{}])[0]
@@ -203,6 +208,10 @@ class AgentOrchestrator:
 
     def _call_gemini(self, chat_id: int, user_text: str, context: AgentToolContext) -> Optional[AgentResponse]:
         """Execute autonomous tool-calling loop using Google Gemini API."""
+        if time.time() < self._gemini_cooldown_until:
+            logger.info("Gemini in cooldown (rate limit / overloaded). Instantly using fast local engine.")
+            return None
+
         key = settings.LLM_API_KEY
         model = settings.LLM_MODEL or "gemini-3.6-flash"
         url = f"https://generativelanguage.googleapis.com/v1beta/models/{model}:generateContent?key={key}"
@@ -228,14 +237,17 @@ class AgentOrchestrator:
                 "tools": tools,
             }
             try:
-                with httpx.Client(timeout=45.0) as client:
+                with httpx.Client(timeout=6.0) as client:
                     resp = client.post(url, json=payload)
                     if resp.status_code != 200:
                         logger.warning(f"Gemini API returned {resp.status_code}: {resp.text[:200]}")
+                        if resp.status_code in (429, 500, 502, 503, 504):
+                            self._gemini_cooldown_until = time.time() + 60.0
                         return None
                     data = resp.json()
             except Exception as e:
-                logger.warning(f"Gemini API request error: {e}")
+                logger.warning(f"Gemini API request error or timeout: {e}")
+                self._gemini_cooldown_until = time.time() + 30.0
                 return None
 
             candidate = data.get("candidates", [{}])[0]

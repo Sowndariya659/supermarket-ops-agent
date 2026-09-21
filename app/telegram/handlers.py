@@ -301,9 +301,13 @@ async def message_handler(update: Update, context: ContextTypes.DEFAULT_TYPE):
         if update_repo.is_already_processed(update_id):
             logger.warning(f"Telegram update {update_id} already processed. Skipping to avoid duplicate side effects.")
             return
-        update_repo.mark_processed(update_id)
+    # 2. Send immediate typing indicator
+    try:
+        await context.bot.send_chat_action(chat_id=chat_id, action="typing")
+    except Exception:
+        pass
 
-    # 2. Process message through the Agent Orchestrator
+    # 3. Process message through the Agent Orchestrator
     try:
         with get_db() as session:
             agent_response = orchestrator.process_message(
