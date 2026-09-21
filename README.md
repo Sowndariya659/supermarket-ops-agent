@@ -9,6 +9,12 @@ An enterprise-grade, highly resilient Autonomous AI Assistant designed specifica
 
 ---
 
+## 🎥 Full Video Demonstration
+
+[**Watch the full demo video here!**](https://github.com/user-attachments/assets/dceb4baf-0a4a-48fd-8efe-b44875d10879)
+
+---
+
 ## ✨ Core Capabilities
 
 - 🧠 **Autonomous Conversational Billing:** Create and modify bills using natural language. The AI understands context and complex queries (e.g., *"Make a bill: 2kg sugar, 4 Maggi, and 1 butter"* or *"Wait, make the Maggi 6 instead"*).
