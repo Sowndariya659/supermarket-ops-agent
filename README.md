@@ -1,9 +1,4 @@
 
-
-https://github.com/user-attachments/assets/dceb4baf-0a4a-48fd-8efe-b44875d10879
-
-
-
 # 🛒 Kirana Ops Agent (Supermarket Assistant)
 
 ![Banner](https://via.placeholder.com/1000x300?text=Kirana+Ops+Agent)
