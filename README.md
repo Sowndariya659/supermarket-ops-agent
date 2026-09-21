@@ -26,7 +26,7 @@ A highly resilient, autonomous AI assistant designed to streamline operations fo
 
 | Adding Items to Bill | Multimodal Vision | End of Day Summary |
 |:---:|:---:|:---:|
-| ![Billing](https://via.placeholder.com/300x500?text=Billing+Screenshot) | ![Vision](https://via.placeholder.com/300x500?text=Vision+Screenshot) | ![Analytics](https://via.placeholder.com/300x500?text=Analytics+Screenshot) |
+| <img src="assets/Screenshot%202026-09-21%20211911.png" width="250"/> | <img src="assets/Screenshot%202026-09-21%20211921.png" width="250"/> | <img src="assets/Screenshot%202026-09-21%20211938.png" width="250"/> |
 
 ---
 
