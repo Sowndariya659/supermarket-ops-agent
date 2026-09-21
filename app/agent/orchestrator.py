@@ -161,14 +161,14 @@ class AgentOrchestrator:
                     resp = client.post(url, json=payload)
                     if resp.status_code != 200:
                         logger.warning(f"Gemini Multimodal returned {resp.status_code}: {resp.text[:200]}")
-                        if resp.status_code == 429:
-                            self._gemini_cooldown_until = time.time() + 60.0
-                            return None
-                        return AgentResponse(text=f"⚠️ Gemini API returned an error: {resp.status_code}")
+                        cooldown = 60.0 if resp.status_code == 429 else 10.0
+                        self._gemini_cooldown_until = time.time() + cooldown
+                        return None
                     data = resp.json()
             except Exception as e:
                 logger.warning(f"Gemini Multimodal request error or timeout: {e}")
-                return AgentResponse(text="⚠️ The AI is taking too long to process this image. Please try again.")
+                self._gemini_cooldown_until = time.time() + 10.0
+                return None
 
             candidate = data.get("candidates", [{}])[0]
             parts = candidate.get("content", {}).get("parts", [])
@@ -241,14 +241,14 @@ class AgentOrchestrator:
                     resp = client.post(url, json=payload)
                     if resp.status_code != 200:
                         logger.warning(f"Gemini API returned {resp.status_code}: {resp.text[:200]}")
-                        if resp.status_code == 429:
-                            self._gemini_cooldown_until = time.time() + 60.0
-                            return None
-                        return AgentResponse(text=f"⚠️ Gemini API returned an error: {resp.status_code}")
+                        cooldown = 60.0 if resp.status_code == 429 else 10.0
+                        self._gemini_cooldown_until = time.time() + cooldown
+                        return None
                     data = resp.json()
             except Exception as e:
                 logger.warning(f"Gemini API request error or timeout: {e}")
-                return AgentResponse(text="⚠️ The AI is taking too long to respond. Please try again.")
+                self._gemini_cooldown_until = time.time() + 10.0
+                return None
 
             candidate = data.get("candidates", [{}])[0]
             parts = candidate.get("content", {}).get("parts", [])
