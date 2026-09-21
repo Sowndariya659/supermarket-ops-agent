@@ -20,7 +20,7 @@ A highly resilient, autonomous AI assistant designed to streamline operations fo
 
 ## 🎥 Demo
 
-[Watch the full demo video here!]((https://github.com/user-attachments/assets/5ef54f1f-75ee-4474-ab6f-988307ec1030))  
+[Watch the full demo video here!]([https://github.com/user-attachments/assets/5ef54f1f-75ee-4474-ab6f-988307ec1030])  
 
 
 ### 📸 Screenshots
