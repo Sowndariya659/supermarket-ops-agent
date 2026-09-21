@@ -24,7 +24,7 @@ class Settings(BaseSettings):
     # LLM Settings (Universal provider support: OpenAI / Gemini / LiteLLM / Groq / Anthropic / Local)
     LLM_API_KEY: str = ""
     LLM_BASE_URL: Optional[str] = None
-    LLM_MODEL: str = "gemini-3-flash-preview"
+    LLM_MODEL: str = os.getenv("LLM_MODEL", "gemini-flash-latest")
 
     # Database
     DATABASE_URL: str = "sqlite:///./supermarket.db"
