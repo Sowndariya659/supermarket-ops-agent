@@ -242,12 +242,12 @@ class AgentOrchestrator:
                     if resp.status_code != 200:
                         logger.warning(f"Gemini API returned {resp.status_code}: {resp.text[:200]}")
                         if resp.status_code in (429, 500, 502, 503, 504):
-                            self._gemini_cooldown_until = time.time() + 60.0
+                            self._gemini_cooldown_until = time.time() + 10.0
                         return None
                     data = resp.json()
             except Exception as e:
                 logger.warning(f"Gemini API request error or timeout: {e}")
-                self._gemini_cooldown_until = time.time() + 30.0
+                self._gemini_cooldown_until = time.time() + 5.0
                 return None
 
             candidate = data.get("candidates", [{}])[0]
