@@ -51,9 +51,9 @@ As a collaborator on this repository, **you do not need to configure any API key
 4. Wait a few seconds for the environment to build.
 5. In the terminal that appears at the bottom of the screen, run the following command:
    ```bash
-   python demo_tour.py
+   python -m app.main
    ```
-6. Open Telegram and search for the bot (or use the link provided in the terminal output) and start chatting!
+6. Open Telegram and click this link to start chatting: [**@kirana_ops_123_bot**](https://t.me/kirana_ops_123_bot)
 
 *(Note: If you encounter a `Conflict` error, ensure you don't have multiple Codespace terminal tabs running the bot at the same time. You can kill existing processes by typing `pkill -f python`).*
 
@@ -80,7 +80,7 @@ If you prefer to run the project on your local machine, follow these steps:
    ```
 4. Run the application:
    ```bash
-   python demo_tour.py
+   python -m app.main
    ```
 
 ---
