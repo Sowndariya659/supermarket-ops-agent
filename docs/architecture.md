@@ -1,85 +1,82 @@
-# 🏗️ Kirana Ops Agent — Architecture Diagram
+# 🏗️ Kirana Ops Agent — Architecture
 
-This diagram shows the main runtime flow from a store operator using Telegram through the application services, AI integrations, persistence layer, and generated reports.
+A concise view of the request path and the systems behind the supermarket assistant.
 
 ```mermaid
-flowchart TB
-    %% Clients and deployment
-    operator["Store operator / cashier"]
-    telegram["Telegram Bot API\npython-telegram-bot"]
-    codespaces["GitHub Codespaces\npython -m app.main"]
+%%{init: {
+  "theme": "base",
+  "flowchart": { "htmlLabels": true, "curve": "linear", "nodeSpacing": 28, "rankSpacing": 44 },
+  "themeVariables": {
+    "fontFamily": "Inter, Arial, sans-serif",
+    "primaryTextColor": "#172033",
+    "lineColor": "#64748b",
+    "clusterBkg": "#f8fafc",
+    "clusterBorder": "#cbd5e1"
+  }
+}}%%
+flowchart LR
+    user([Store operator])
 
-    %% Application boundary
-    subgraph app["Kirana Ops Agent — Python application"]
-        entry["Application entrypoint\nFastAPI + bot polling/webhook"]
-        router["Message & media router"]
-        context["Conversation context\nvalidation + JSON tool schema"]
-        breaker["Resilient fallback engine\ncircuit breaker for 429/503"]
-
-        subgraph domain["Store operations"]
-            billing["Conversational billing"]
-            inventory["Inventory management"]
-            khata["Khata credit ledger"]
-            analytics["Sales analytics & summaries"]
-        end
-
-        reports["Report generators\nPDF invoices + PPTX decks"]
-        orm["SQLAlchemy ORM\ntransaction boundaries"]
+    subgraph interface["1 · INTERFACE"]
+        tg["Telegram Bot API<br/><small>text · images · replies</small>"]
     end
 
-    %% External services and storage
-    gemini["Google Gemini multimodal API\ngemini-3-flash-preview"]
-    sqlite[("SQLite database")]
-    artifacts[("Generated documents\nPDF / PPTX")]
-    secrets["Repository secrets / .env\nTelegram token + LLM API key"]
+    subgraph runtime["2 · APPLICATION"]
+        api["FastAPI + Python<br/><small>app.main</small>"]
+        router["Message router<br/><small>conversation context</small>"]
+        guard{"Gemini available?"}
+    end
 
-    operator -->|text, photos, invoices| telegram
-    telegram <--> |messages, images, replies| entry
-    codespaces --> entry
-    secrets -. configuration .-> entry
+    subgraph services["3 · DOMAIN SERVICES"]
+        ops["Store operations<br/><small>billing · inventory · Khata · analytics</small>"]
+        reports["Report generation<br/><small>PDF invoices · PPTX summaries</small>"]
+    end
 
-    entry --> router
-    router --> context
-    context --> breaker
-    breaker -->|normal path| gemini
-    breaker -->|quota/outage| domain
-    gemini -->|structured tool calls / vision extraction| context
-    context --> domain
+    subgraph data["4 · DATA & INTEGRATIONS"]
+        db[("SQLite\nSQLAlchemy")]
+        ai["Google Gemini<br/><small>multimodal · structured tools</small>"]
+        files[("PDF / PPTX artifacts")]
+    end
 
-    billing -->|create/update bill| orm
-    inventory -->|stock lookup & atomic decrement| orm
-    khata -->|debt / repayment ledger| orm
-    analytics -->|sales queries| orm
-    orm <--> sqlite
+    user -->|message or photo| tg
+    tg <--> api
+    api --> router --> guard
+    guard -->|yes| ai
+    ai -->|structured response| ops
+    guard -->|no · 429 / 503| ops
+    ops <--> db
+    ops --> reports --> files
+    files -->|download| tg
+    ops -->|reply| api
 
-    billing --> reports
-    analytics --> reports
-    reports --> artifacts
-    artifacts -->|downloadable invoice / analysis| telegram
-    domain -->|operational response| entry
-    entry -->|reply| telegram
+    classDef actor fill:#0f172a,stroke:#0f172a,color:#ffffff;
+    classDef interface fill:#e0f2fe,stroke:#0284c7,color:#0c4a6e;
+    classDef application fill:#ede9fe,stroke:#7c3aed,color:#3b0764;
+    classDef domain fill:#dcfce7,stroke:#16a34a,color:#14532d;
+    classDef integration fill:#ffedd5,stroke:#ea580c,color:#7c2d12;
+    classDef decision fill:#fef3c7,stroke:#d97706,color:#78350f;
+    class user actor;
+    class tg interface;
+    class api,router application;
+    class ops,reports domain;
+    class db,ai,files integration;
+    class guard decision;
 
-    classDef external fill:#fff3e0,stroke:#e65100,color:#4e342e;
-    classDef app fill:#e3f2fd,stroke:#1565c0,color:#0d47a1;
-    classDef data fill:#e8f5e9,stroke:#2e7d32,color:#1b5e20;
-    classDef resilience fill:#fce4ec,stroke:#ad1457,color:#880e4f;
-
-    class operator,telegram,codespaces,gemini,secrets external;
-    class entry,router,context,billing,inventory,khata,analytics,reports app;
-    class sqlite,artifacts,orm data;
-    class breaker resilience;
+    style interface fill:#f8fbff,stroke:#bae6fd,stroke-width:1px
+    style runtime fill:#faf9ff,stroke:#ddd6fe,stroke-width:1px
+    style services fill:#f7fdf8,stroke:#bbf7d0,stroke-width:1px
+    style data fill:#fffaf5,stroke:#fed7aa,stroke-width:1px
 ```
 
-## Request flow
+## Runtime flow
 
-1. A cashier sends text or an image through Telegram.
-2. The Python application routes the message and builds conversational context.
-3. The fallback engine calls Gemini for natural-language understanding and multimodal extraction when the service is available.
-4. Structured tool calls are dispatched to billing, inventory, Khata, or analytics services.
-5. SQLAlchemy persists changes in SQLite, including transactional inventory updates.
-6. PDF invoices and PPTX analysis decks are generated when requested and returned through Telegram.
-7. When Gemini returns a quota or availability error (`429`/`503`), the circuit breaker routes the request to the resilient local fallback path instead of failing silently.
+1. The operator sends text or an image through Telegram.
+2. FastAPI routes the request and prepares conversational context.
+3. Gemini interprets the request and returns structured tool data when available.
+4. Domain services update billing, inventory, Khata, or analytics data through SQLAlchemy.
+5. SQLite stores the operational data; invoices and summaries are generated as PDF/PPTX files.
+6. If Gemini is unavailable (`429`/`503`), the fallback path continues through the operations layer.
 
-## Deployment boundary
+## Deployment
 
-The application runs with `python -m app.main` in GitHub Codespaces. Telegram and Gemini credentials are supplied through repository secrets in Codespaces or through a local `.env` file during local development.
+The application runs with `python -m app.main` in GitHub Codespaces or locally. Telegram and Gemini credentials are supplied through repository secrets or a local `.env` file.
